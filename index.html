@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwasthaSukha</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/512/s-letter.png">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>आज कति खाने</h1>
+            <p class="welcome-note">स्वस्थ हुनु, सन्तुष्ट हुनु,सुखी हुनु, खुशी हुनु</p>
+            <p id="dailyQuote" class="motivation">"Loading inspiration..."</p>
+        </header>
+        
+        <div class="card">
+            <label>Daily Limit (kcal):</label>
+            <input type="number" id="dailyLimit" value="1500" oninput="updateDisplay()">
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">Consumed: <span id="consumed">0</span> kcal</div>
+            <div class="stat-box">Remaining: <span id="remaining">1500</span> kcal</div>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0;">Add Food</h3>
+                <button onclick="toggleManual()" id="manualToggle" class="toggle-btn">Manual Mode</button>
+            </div>
+
+            <div id="apiFields" class="input-group">
+                <input type="text" id="foodSearch" placeholder="Search (e.g., Apple)">
+                <input type="number" id="quantity" placeholder="Grams" value="Grams">
+            </div>
+
+            <div id="manualFields" class="input-group" style="display: none;">
+                <input type="text" id="manualName" placeholder="Food Name">
+                <input type="number" id="manualKcal" placeholder="Total kcal">
+            </div>
+
+            <button onclick="handleAdd()" id="addBtn" style="margin-top: 15px; width: 100%;">Add to Log</button>
+        </div>
+
+        <div class="log-section">
+            <div class="log-header">
+                <h3>Today's Log</h3>
+                <button onclick="clearAll()" class="clear-btn">Clear All</button>
+            </div>
+            <ul id="foodLog"></ul>
+        </div>
+        
+        <p class="note">Note: 1 kcal = 1 food Calorie.</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
