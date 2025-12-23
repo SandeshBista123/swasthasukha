@@ -1,23 +1,24 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { createGoogleGenerativeAI } = require("@google/genai");
 
 exports.handler = async (event) => {
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    
-    // We are switching to "gemini-1.5-flash-latest" to avoid the 404 error
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    // New initialization method for the latest SDK
+    const client = createGoogleGenerativeAI({
+      apiKey: process.env.GEMINI_API_KEY
+    });
+
+    // Use the brand new Gemini 3 Flash model
+    const model = client.getGenerativeModel({ model: "gemini-3-flash" });
 
     const data = JSON.parse(event.body);
     
-    const prompt = `You are a friendly health coach for a Nepali family.
-    Food log: ${data.log}. 
-    Total calories: ${data.total}. Goal: ${data.limit}. 
-    Provide 3 short health tips in English and Romanized Nepali. 
-    Keep it under 50 words.`;
+    const prompt = `You are a health coach for a Nepali family. 
+    Food log: ${data.log}. Goal: ${data.limit} kcal. 
+    Give 3 short tips in English/Romanized Nepali. Keep it under 50 words.`;
 
+    // New generation method
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = result.response.text();
 
     return {
       statusCode: 200,
@@ -25,12 +26,10 @@ exports.handler = async (event) => {
       body: JSON.stringify({ advice: text }),
     };
   } catch (error) {
-    // This logs the specific error to your Netlify dashboard
-    console.error("Gemini API Error:", error.message);
-    
+    console.error("Gemini 3 Error:", error.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "The coach is updating. Please try again in a moment!" }),
+      body: JSON.stringify({ error: "The coach is refreshing for Gemini 3. Try again in a second!" }),
     };
   }
 };
