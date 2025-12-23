@@ -133,3 +133,32 @@ window.onload = () => {
     }
     document.getElementById('dailyQuote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
 };
+
+async function getAIAdvice() {
+    const adviceDiv = document.getElementById('aiAdviceDisplay');
+    const btn = document.getElementById('aiCoachBtn');
+    
+    // Get the current log items
+    const logItems = Array.from(document.querySelectorAll('#foodLog li'))
+                          .map(li => li.innerText).join(", ");
+    const limit = document.getElementById('dailyLimit').value;
+
+    btn.innerText = "Coach is thinking...";
+    adviceDiv.innerText = "";
+
+    try {
+        const response = await fetch('/.netlify/functions/get-ai-advice', {
+            method: 'POST',
+            body: JSON.stringify({
+                log: logItems,
+                total: totalConsumed,
+                limit: limit
+            })
+        });
+        const data = await response.json();
+        adviceDiv.innerText = data.advice;
+    } catch (err) {
+        adviceDiv.innerText = "The coach is resting right now. Try again later!";
+    }
+    btn.innerText = "Ask AI Coach ✨";
+}
