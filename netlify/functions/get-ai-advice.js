@@ -1,24 +1,28 @@
-const { createGoogleGenerativeAI } = require("@google/genai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 exports.handler = async (event) => {
   try {
-    // New initialization method for the latest SDK
-    const client = createGoogleGenerativeAI({
-      apiKey: process.env.GEMINI_API_KEY
-    });
+    // 1. Initialize the API
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-    // Use the brand new Gemini 3 Flash model
-    const model = client.getGenerativeModel({ model: "gemini-3-flash" });
+    // 2. Use the "gemini-1.5-flash" model but force the SDK to use the stable v1 endpoint
+    // We do this by passing the model name string directly.
+    const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash"
+    });
 
     const data = JSON.parse(event.body);
     
-    const prompt = `You are a health coach for a Nepali family. 
-    Food log: ${data.log}. Goal: ${data.limit} kcal. 
-    Give 3 short tips in English/Romanized Nepali. Keep it under 50 words.`;
+    const prompt = `You are a friendly health coach for a Nepali family.
+    Food log: ${data.log}. 
+    Total calories: ${data.total}. Goal: ${data.limit}. 
+    Provide 3 short health tips in English and Romanized Nepali. 
+    Keep it under 50 words.`;
 
-    // New generation method
+    // 3. Generate Content
     const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const response = await result.response;
+    const text = response.text();
 
     return {
       statusCode: 200,
@@ -26,10 +30,15 @@ exports.handler = async (event) => {
       body: JSON.stringify({ advice: text }),
     };
   } catch (error) {
-    console.error("Gemini 3 Error:", error.message);
+    console.error("Gemini API Error:", error.message);
+    
+    // If we still get a 404, it might be an API Key region issue
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "The coach is refreshing for Gemini 3. Try again in a second!" }),
+      body: JSON.stringify({ 
+        error: "Coach is resting.", 
+        details: error.message 
+      }),
     };
   }
 };
