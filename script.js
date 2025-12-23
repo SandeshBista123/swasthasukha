@@ -2,7 +2,7 @@ const API_KEY = 'nfIy16UWdgJ1bdz60r8skJd5s6oV6IBsoglRYKkh';
 let totalConsumed = 0;
 let isManualMode = false;
 
-// 70+ Daily Inspiration Quotes
+// Fixed Quotes Array
 const quotes = [
     "Health is wealth. - Svasthya nai dhana ho.",
     "A journey of a thousand miles begins with a single step.",
@@ -105,7 +105,6 @@ async function searchFood(query, grams) {
             const nutrient = food.foodNutrients.find(n => n.unitName === 'KCAL' || n.nutrientId === 1008);
             const calsPer100g = nutrient ? nutrient.value : 0;
             const finalCals = (calsPer100g * grams) / 100;
-            
             addItemToLog(food.description, finalCals, grams + "g");
             document.getElementById('foodSearch').value = "";
         } else {
@@ -121,7 +120,6 @@ async function searchFood(query, grams) {
 function addItemToLog(name, kcal, detail) {
     totalConsumed += kcal;
     let cleanName = name.replace(/, raw|raw|, fresh|fresh|, dried/gi, "").trim();
-    
     const log = document.getElementById('foodLog');
     const li = document.createElement('li');
     li.dataset.kcal = kcal;
@@ -152,11 +150,102 @@ function updateDisplay() {
     const limitInput = document.getElementById('dailyLimit');
     const limit = parseFloat(limitInput.value) || 1500;
     const remaining = limit - totalConsumed;
-    
     document.getElementById('consumed').innerText = Math.round(totalConsumed);
     document.getElementById('remaining').innerText = Math.round(remaining);
-    
     const percent = Math.min((totalConsumed / limit) * 100, 100);
     const bar = document.getElementById('progressBar');
     if (bar) {
-        bar.style.width = percent + "%
+        bar.style.width = percent + "%";
+        bar.style.backgroundColor = totalConsumed > limit ? "#e74c3c" : "#27ae60";
+    }
+}
+
+// --- 2. SUMMARY & AI COACH ---
+
+function showSummary() {
+    const limit = parseFloat(document.getElementById('dailyLimit').value) || 1500;
+    const modal = document.getElementById('summaryModal');
+    const statsDiv = document.getElementById('summaryStats');
+    const listDiv = document.getElementById('summaryList');
+    let color = totalConsumed > limit ? "#e74c3c" : "#27ae60";
+    statsDiv.innerHTML = `
+        <h1 style="color: ${color}; margin: 10px 0;">${Math.round(totalConsumed)} kcal</h1>
+        <p>Goal: ${limit} kcal | Status: ${totalConsumed > limit ? 'Over Limit' : 'On Track'}</p>
+    `;
+    let listHtml = "";
+    document.querySelectorAll('#foodLog li').forEach(item => {
+        const name = item.querySelector('strong').innerText;
+        const kcal = item.querySelector('div:last-child strong').innerText;
+        listHtml += `<div class="summary-row"><span>${name}</span><span>${kcal}</span></div>`;
+    });
+    listDiv.innerHTML = listHtml || "<p style='text-align:center; color:gray;'>No items logged yet.</p>";
+    modal.style.display = 'flex';
+}
+
+function closeSummary() {
+    document.getElementById('summaryModal').style.display = 'none';
+}
+
+async function getAIAdvice() {
+    const adviceDiv = document.getElementById('aiAdviceDisplay');
+    const btn = document.getElementById('aiCoachBtn');
+    const logItems = Array.from(document.querySelectorAll('#foodLog li'))
+                          .map(li => li.innerText.replace('X', '').trim()).join(", ");
+    const limit = document.getElementById('dailyLimit').value;
+    if (!logItems) return alert("Log some food first!");
+    btn.innerText = "Coach is thinking...";
+    btn.disabled = true;
+    adviceDiv.style.display = "block";
+    adviceDiv.innerText = "Connecting to Gemini AI...";
+    try {
+        const response = await fetch('/.netlify/functions/get-ai-advice', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                log: logItems,
+                total: Math.round(totalConsumed),
+                limit: limit
+            })
+        });
+        const data = await response.json();
+        adviceDiv.innerText = data.advice || "The coach is resting. Try again soon.";
+    } catch (err) {
+        adviceDiv.innerText = "Error: Could not reach the AI Coach.";
+    } finally {
+        btn.innerText = "Ask AI Coach ✨";
+        btn.disabled = false;
+    }
+}
+
+// --- 3. DATA PERSISTENCE ---
+
+function clearAll() {
+    if(confirm("Clear everything for today?")) {
+        totalConsumed = 0;
+        document.getElementById('foodLog').innerHTML = "";
+        updateDisplay();
+        localStorage.removeItem('swasthaData');
+    }
+}
+
+function saveData() {
+    const data = {
+        total: totalConsumed,
+        logHtml: document.getElementById('foodLog').innerHTML,
+        limit: document.getElementById('dailyLimit').value
+    };
+    localStorage.setItem('swasthaData', JSON.stringify(data));
+}
+
+window.onload = () => {
+    const saved = JSON.parse(localStorage.getItem('swasthaData'));
+    if (saved) {
+        totalConsumed = parseFloat(saved.total) || 0;
+        document.getElementById('foodLog').innerHTML = saved.logHtml || "";
+        document.getElementById('dailyLimit').value = saved.limit || 1500;
+        updateDisplay();
+    }
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    const quoteEl = document.getElementById('dailyQuote');
+    if (quoteEl) quoteEl.innerText = randomQuote;
+};
