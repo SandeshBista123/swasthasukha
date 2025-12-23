@@ -98,7 +98,8 @@ async function searchFood(query, grams) {
     const btn = document.getElementById('addBtn');
     btn.innerText = "Searching...";
     try {
-        const response = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=${query}&pageSize=5&api_key=${API_KEY}`);
+        // Change this line in your searchFood function:
+const response = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=${query}%20raw&pageSize=5&api_key=${API_KEY}`);
         const data = await response.json();
         if (data.foods && data.foods.length > 0) {
             const food = data.foods[0];
@@ -249,3 +250,4 @@ window.onload = () => {
     const quoteEl = document.getElementById('dailyQuote');
     if (quoteEl) quoteEl.innerText = randomQuote;
 };
+
