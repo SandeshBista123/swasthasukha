@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SwasthaSukha</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/512/s-letter.png">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>आज कति खाने</h1>
-            <p class="welcome-note">स्वस्थ हुनु, सन्तुष्ट हुनु,सुखी हुनु, खुशी हुनु</p>
+            <h1 style="color: #27ae60;">आज कति खाने</h1>
+            <p class="welcome-note">स्वस्थ हुनु, सन्तुष्ट हुनु, सुखी हुनु, खुशी हुनु</p>
             <p id="dailyQuote" class="motivation">"Loading inspiration..."</p>
         </header>
         
@@ -37,7 +35,7 @@
 
             <div id="apiFields" class="input-group">
                 <input type="text" id="foodSearch" placeholder="Search (e.g., Apple)">
-                <input type="number" id="quantity" placeholder="Grams" value="Grams">
+                <input type="number" id="quantity" placeholder="Grams" value="100">
             </div>
 
             <div id="manualFields" class="input-group" style="display: none;">
@@ -45,19 +43,31 @@
                 <input type="number" id="manualKcal" placeholder="Total kcal">
             </div>
 
-            <button onclick="handleAdd()" id="addBtn" style="margin-top: 15px; width: 100%;">Add to Log</button>
+            <button onclick="handleAdd()" id="addBtn" style="margin-top: 15px; width: 100%; background-color: #2c3e50; color: white; border: none; padding: 12px; border-radius: 8px;">Add to Log</button>
         </div>
 
         <div class="log-section">
-            <div class="log-header">
-                <h3>Today's Log</h3>
-                <button onclick="clearAll()" class="clear-btn">Clear All</button>
+            <div class="log-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0;">Today's Log</h3>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="showSummary()" class="summary-btn">Summary</button>
+                    <button onclick="clearAll()" class="clear-btn">Clear All</button>
+                </div>
             </div>
             <ul id="foodLog"></ul>
         </div>
-        
-        <p class="note">Note: 1 kcal = 1 food Calorie.</p>
     </div>
+
+    <div id="summaryModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2>Daily Report</h2>
+            <hr>
+            <div id="summaryStats"></div>
+            <div id="summaryList" class="summary-scroll"></div>
+            <button onclick="closeSummary()" style="width:100%; padding:10px; margin-top:10px; background:#27ae60; color:white; border:none; border-radius:5px;">Close</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
