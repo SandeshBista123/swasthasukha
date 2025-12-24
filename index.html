@@ -2,77 +2,126 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwasthaSukha</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SwasthaSukha Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1 style="color: #27ae60;">आज कति खाने</h1>
-            <p class="welcome-note">स्वस्थ हुनु, सन्तुष्ट हुनु, सुखी हुनु, खुशी हुनु</p>
-            <p id="dailyQuote" class="motivation">"Loading inspiration..."</p>
+    <div class="main-boundary"> 
+        <header class="main-header">
+            <h1>आज के खाने</h1>
+            <p id="dailyQuote">Svasthya nai dhana ho.</p>
         </header>
-        
-        <div class="card">
-            <label>Daily Limit (kcal):</label>
-            <input type="number" id="dailyLimit" value="1500" oninput="updateDisplay()">
-            <div class="progress-container">
-                <div id="progressBar" class="progress-bar"></div>
+
+        <div class="app-layout">
+            <div class="tracker-column">
+                <section class="card stats-card">
+    <div class="stat-header">
+        <span id="consumed">0</span> <span class="slash">/</span>
+        <input type="number" id="dailyLimit" value="1700" oninput="updateDisplay()">
+        <span class="kcal-label">kcal</span>
+    </div>
+    <div class="progress-container"><div id="progressBar"></div></div>
+    
+    <div id="remainingBox" class="remaining-box">
+        <span class="rem-label">Remaining</span>
+        <div class="rem-value"><span id="remaining">1700</span> <small>kcal</small></div>
+    </div>
+</section>
+
+                <section class="card input-section">
+                    <button id="modeToggleBtn" onclick="toggleEntryMode()">Switch to Manual Mode</button>
+                    <div id="searchModeUI">
+                        <input type="text" id="foodSearch" placeholder="Search (e.g. Rice, Dal)">
+                        <div class="qty-row">
+                            <input type="number" id="quantity" value="1">
+                            <select id="unitSelector">
+                                <option value="g">Grams</option>
+                                <option value="spoon">Spoon</option>
+                                <option value="muthi">Muthi</option>
+                                <option value="piece">Piece</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="manualModeUI" style="display: none;">
+                        <input type="text" id="manualName" placeholder="What did you eat?">
+                        <input type="number" id="manualKcal" placeholder="Calories">
+                    </div>
+                    <button id="addBtn" onclick="handleAdd()">Add to Log</button>
+                    <button onclick="openSummaryModal()" class="summary-trigger-btn">📋 View Daily Report</button>
+                </section>
+
+                <section class="log-section">
+                    <h3>Today's Food Log</h3>
+                    <ul id="foodLog"></ul>
+                    <button class="clear-btn" onclick="clearAll()">Clear All</button>
+                </section>
             </div>
-        </div>
 
-        <div class="stats-grid">
-            <div class="stat-box">Consumed: <span id="consumed">0</span> kcal</div>
-            <div class="stat-box">Remaining: <span id="remaining">1500</span> kcal</div>
-        </div>
+            <div class="tools-column">
+                <section class="card tool-card">
+                    <h3>Smart Goal Setter</h3>
+                    <div class="calc-grid">
+                        <input type="number" id="age" placeholder="Age">
+                        <input type="number" id="heightcm" placeholder="Height(cm)">
+                        <input type="number" id="currentWeight" placeholder="Weight(kg)">
+                        <select id="activity">
+                            <option value="1.2">Sedentary</option>
+                            <option value="1.375">Lightly Active</option>
+                            <option value="1.55">Moderately Active</option>
+                        </select>
+                    </div>
+                    <button onclick="calculateAdvanced()" class="tool-btn">Calculate Target</button>
+                </section>
 
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h3 style="margin: 0;">Add Food</h3>
-                <button onclick="toggleManual()" id="manualToggle" class="toggle-btn">Manual Mode</button>
+                <section class="card tool-card">
+                    <h3>Loss Predictor</h3>
+                    <input type="number" id="deficitInput" placeholder="Daily Deficit (kcal)" oninput="predictWeightLoss()">
+                    <div id="predictionOutput" class="prediction-box">Results shown here.</div>
+                    <p class="hint">7700 kcal deficit ≈ 1kg loss</p>
+                </section>
             </div>
-
-            <div id="apiFields" class="input-group">
-                <input type="text" id="foodSearch" placeholder="Search (e.g., Apple)">
-                <input type="number" id="quantity" placeholder="Grams" value="100">
-            </div>
-
-            <div id="manualFields" class="input-group" style="display: none;">
-                <input type="text" id="manualName" placeholder="Food Name">
-                <input type="number" id="manualKcal" placeholder="Total kcal">
-            </div>
-
-            <button onclick="handleAdd()" id="addBtn" style="margin-top: 15px; width: 100%; background-color: #2c3e50; color: white; border: none; padding: 12px; border-radius: 8px;">Add to Log</button>
-        </div>
-
-        <div class="log-section">
-            <div class="log-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin: 0;">Today's Log</h3>
-                <div style="display: flex; gap: 8px;">
-                    <button onclick="showSummary()" class="summary-btn">Summary</button>
-                    <button onclick="clearAll()" class="clear-btn">Clear All</button>
-                </div>
-            </div>
-            <ul id="foodLog"></ul>
         </div>
     </div>
 
-    <div id="summaryModal" class="modal-overlay" style="display: none;">
+    <div id="summaryModal" class="modal">
         <div class="modal-content">
-            <h2>Daily Report</h2>
-            <hr>
-            <div id="summaryStats"></div>
-            <div id="summaryList" class="summary-scroll"></div>
-            <button onclick="closeSummary()" style="width:100%; padding:10px; margin-top:10px; background:#27ae60; color:white; border:none; border-radius:5px;">Close</button>
-        <button id="aiCoachBtn" onclick="getAIAdvice()" style="width: 100%; margin-top: 10px; background: #8e44ad; color: white; border: none; padding: 10px; border-radius: 5px;">
-    Ask AI Coach ✨
-</button>
-<div id="aiAdviceDisplay" style="margin-top: 10px; font-size: 0.9rem; font-style: italic; color: #444;"></div>
+            <span class="close-modal" onclick="closeSummaryModal()">&times;</span>
+            <div id="reportCard" class="report-card-capture">
+    <div class="leaf-container"><span class="leaf-icon">🌿</span></div>
+    <h2 class="report-title">Daily Wellness Status</h2>
+    
+    <div class="stat-hero">
+        <p class="intake-label">Your daily calorie intake is</p>
+        <div class="intake-value"><span id="cardConsumed">0</span> <small>kcal</small></div>
+        <p class="intake-goal">Target: <span id="cardLimit">1700</span> kcal</p>
+    </div>
+
+    <div class="food-strip-container">
+        <p class="strip-label">Items Logged Today</p>
+        <div id="cardLogList" class="food-strip">
+            </div>
+    </div>
+
+    <div class="ai-insight-card">
+        <div id="summaryOutput" class="report-ai-text">
+            Please click on <strong>Get Gemini Review</strong> for suggestions on what to eat.
+        </div>
+    </div>
+</div>
+                <div class="report-log"><ul id="cardLogList"></ul></div>
+                <div id="summaryOutput" class="report-ai-text">Waiting for Gemini analysis...</div>
+            </div>
+            <div class="modal-actions">
+                <button onclick="getAIReview()" class="ai-btn">Get Gemini Review</button>
+                <button class="download-circle" onclick="downloadAsImage()">
+                    <span class="cam-icon">📷</span><small>Save</small>
+                </button>
+            </div>
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
 </html>
-
